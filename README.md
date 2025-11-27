@@ -4,19 +4,23 @@ Backend service for the Campus Lost & Found system, designed with privacy-first 
 
 ## 🚀 Tech Stack
 
-- **Language:** Go (Golang) 1.22+
+- **Language:** Go (Golang) 1.24
 - **Framework:** Gin Gonic
 - **Database:** PostgreSQL (via Supabase)
 - **ORM:** GORM
 - **Authentication:** JWT (JSON Web Tokens)
 - **Documentation:** Swagger (Swaggo)
+- **Deployment:** Docker & Jenkins (CI/CD)
 
 ## 🛠️ Prerequisites
 
-- Go 1.22 or higher
+- Go 1.24 or higher
+- Docker & Docker Compose (optional for local dev)
 - PostgreSQL database (or Supabase project)
 
 ## ⚙️ Setup & Installation
+
+### Local Development
 
 1.  **Clone the repository**
     ```bash
@@ -30,25 +34,62 @@ Backend service for the Campus Lost & Found system, designed with privacy-first 
     ```
 
 3.  **Environment Variables**
-    Create a `.env` file in the root directory based on the example below:
+    Create a `.env` file in the root directory. You can copy the example below:
 
     ```env
+    # Database
     DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=disable"
+    
+    # Server
+    PORT=3000
+    GIN_MODE=debug # or release
+    
+    # Auth
     JWT_SECRET="your_super_secret_key"
-    PORT=8080
+    JWT_EXPIRY=24h
+    
+    # CORS
+    ALLOWED_ORIGINS=http://localhost:4200,http://localhost:8080
+    
+    # File Upload
+    MAX_UPLOAD_SIZE=10485760 # 10MB
+    UPLOAD_PATH=./uploads
     ```
 
 4.  **Run the Server**
     ```bash
     go run cmd/server/main.go
     ```
-    The server will start on port `8080` (or the port defined in `.env`). Database migrations will run automatically on startup.
+    The server will start on port `3000` (default).
+
+### Docker Deployment (VPS)
+
+The project is configured for automated deployment via Jenkins using Docker.
+
+1.  **Dockerfile**: Builds a lightweight Alpine-based image.
+2.  **Jenkinsfile**: Automates the build and deploy process.
+    -   Builds Docker image `campus-lost-found`.
+    -   Runs container `campus-lost-found-container`.
+    -   Mounts `.env` from `/var/www/campus-lost-found/.env`.
+    -   Mounts storage from `/var/www/campus-lost-found/storage`.
+
+**VPS Requirements:**
+-   Docker installed & user added to `docker` group.
+-   Directory `/var/www/campus-lost-found` created.
+-   `.env` file present in that directory.
 
 ## 📚 API Documentation
 
-Once the server is running, you can access the interactive Swagger API documentation at:
+### Live Swagger Docs (VPS)
+👉 **http://157.10.161.213:3000/swagger/index.html**
 
-👉 **http://localhost:8080/swagger/index.html**
+### Local Swagger Docs
+👉 **http://localhost:3000/swagger/index.html**
+
+To update Swagger docs after code changes:
+```bash
+swag init -g cmd/server/main.go --output docs
+```
 
 ## ✨ Key Features
 
@@ -62,6 +103,7 @@ Once the server is running, you can access the interactive Swagger API documenta
 -   **Smart Matching Engine**: Automatically matches "Found Items" (without QR) to "Lost Assets" based on category and time.
 -   **Claims System**: Owners can claim found items by answering verification questions.
 -   **Notifications**: In-app notifications for matches and claim updates.
+-   **File Uploads**: Secure image uploads for assets and found items.
 
 ## 📂 Project Structure
 
