@@ -27,7 +27,7 @@ WORKDIR /root/
 
 # Copy the Pre-built binary from the previous stage
 COPY --from=builder /app/campus-lost-found .
-COPY --from=builder /app/.env . 
+# COPY --from=builder /app/.env . 
 # Note: In production, it's better to inject env vars via Docker/Jenkins, but copying .env for simplicity if it exists.
 # Ideally, we should NOT copy .env and rely on environment variables passed at runtime.
 
