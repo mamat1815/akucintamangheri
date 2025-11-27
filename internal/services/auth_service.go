@@ -6,6 +6,7 @@ import (
 	"campus-lost-and-found/internal/repository"
 	"campus-lost-and-found/internal/utils"
 	"errors"
+	"strings"
 )
 
 type AuthService struct {
@@ -28,8 +29,21 @@ func (s *AuthService) Register(req dto.RegisterRequest) (*dto.AuthResponse, erro
 	}
 
 	role := models.RoleUser
-	if req.Role != "" {
-		role = models.UserRole(req.Role)
+	if strings.HasSuffix(req.Email, "@students.uii.ac.id") {
+		role = models.RoleStudent
+	} else if strings.HasSuffix(req.Email, "@uii.ac.id") {
+		role = models.RoleStaff
+	} else if req.Role != "" {
+		// Optional: Allow manual override if needed, or remove this if strict
+		// Keeping it for Admin/Security creation if exposed, but usually public reg ignores it.
+		// Let's prioritize email logic for these domains, but allow others?
+		// For safety, let's say if email matches, enforce it.
+		// If not, default to USER (or whatever req.Role is if we trust it? No, public reg shouldn't trust req.Role)
+		// Let's stick to the plan:
+		// Others -> USER.
+		// If we want to allow ADMIN creation, that should be a separate seeded process or admin-only endpoint.
+		// So for public register:
+		role = models.RoleUser
 	}
 
 	user := &models.User{
