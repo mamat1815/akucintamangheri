@@ -1,0 +1,848 @@
+basePath: /api/v1
+definitions:
+  dto.AssetResponse:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      lost_mode:
+        type: boolean
+      owner_id:
+        type: string
+      private_image_url:
+        description: Only for owner
+        type: string
+      qr_code_url:
+        type: string
+    type: object
+  dto.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserResponse'
+    type: object
+  dto.ClaimResponse:
+    properties:
+      answer_input:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      item_id:
+        type: string
+      owner_id:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.CreateAssetRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        type: string
+      lost_mode:
+        type: boolean
+      private_image_url:
+        type: string
+    required:
+    - category_id
+    - description
+    type: object
+  dto.CreateClaimRequest:
+    properties:
+      answer_input:
+        type: string
+    required:
+    - answer_input
+    type: object
+  dto.CreateFoundItemRequest:
+    properties:
+      category_id:
+        type: string
+      image_url:
+        type: string
+      location_id:
+        type: string
+      title:
+        type: string
+      verification_answer:
+        type: string
+      verification_question:
+        type: string
+    required:
+    - category_id
+    - location_id
+    - title
+    - verification_answer
+    - verification_question
+    type: object
+  dto.DecideClaimRequest:
+    properties:
+      status:
+        enum:
+        - APPROVED
+        - REJECTED
+        type: string
+    required:
+    - status
+    type: object
+  dto.ItemResponse:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      location_id:
+        type: string
+      location_name:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      verification_question:
+        type: string
+    type: object
+  dto.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  dto.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      role:
+        description: Optional, default to USER in service if empty
+        enum:
+        - USER
+        - ADMIN
+        - SECURITY
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone
+    type: object
+  dto.ReportFoundRequest:
+    properties:
+      image_url:
+        type: string
+      location_id:
+        type: string
+      note:
+        type: string
+    required:
+    - location_id
+    type: object
+  dto.UpdateLostModeRequest:
+    properties:
+      lost_mode:
+        type: boolean
+    type: object
+  dto.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  models.Asset:
+    properties:
+      category:
+        $ref: '#/definitions/models.ItemCategory'
+      category_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      lost_mode:
+        type: boolean
+      owner:
+        $ref: '#/definitions/models.User'
+      owner_id:
+        type: string
+      private_image_url:
+        description: Not shown publicly
+        type: string
+      qr_code_url:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.CampusLocation:
+    properties:
+      id:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+    type: object
+  models.Claim:
+    properties:
+      answer_input:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      item:
+        $ref: '#/definitions/models.Item'
+      item_id:
+        type: string
+      owner:
+        $ref: '#/definitions/models.User'
+      owner_id:
+        type: string
+      status:
+        $ref: '#/definitions/models.ClaimStatus'
+      updated_at:
+        type: string
+    type: object
+  models.ClaimStatus:
+    enum:
+    - PENDING
+    - APPROVED
+    - REJECTED
+    type: string
+    x-enum-varnames:
+    - ClaimStatusPending
+    - ClaimStatusApproved
+    - ClaimStatusRejected
+  models.FoundEvent:
+    properties:
+      asset:
+        $ref: '#/definitions/models.Asset'
+      asset_id:
+        type: string
+      created_at:
+        type: string
+      finder:
+        $ref: '#/definitions/models.User'
+      finder_id:
+        description: Can be nil if anonymous scan? No, prompt says FinderID FK. Assuming
+          authenticated finder or security.
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      location:
+        $ref: '#/definitions/models.CampusLocation'
+      location_id:
+        type: string
+      note:
+        type: string
+    type: object
+  models.Item:
+    properties:
+      category:
+        $ref: '#/definitions/models.ItemCategory'
+      category_id:
+        type: string
+      created_at:
+        type: string
+      finder:
+        $ref: '#/definitions/models.User'
+      finder_id:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      location:
+        $ref: '#/definitions/models.CampusLocation'
+      location_id:
+        type: string
+      status:
+        $ref: '#/definitions/models.ItemStatus'
+      title:
+        type: string
+      updated_at:
+        type: string
+      verification_question:
+        type: string
+    type: object
+  models.ItemCategory:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.ItemStatus:
+    enum:
+    - OPEN
+    - CLAIMED
+    - RESOLVED
+    type: string
+    x-enum-varnames:
+    - ItemStatusOpen
+    - ItemStatusClaimed
+    - ItemStatusResolved
+  models.Notification:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_read:
+        type: boolean
+      ref_id:
+        type: string
+      ref_type:
+        description: e.g., "ASSET_FOUND", "CLAIM_UPDATE"
+        type: string
+      title:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      role:
+        $ref: '#/definitions/models.UserRole'
+      updated_at:
+        type: string
+    type: object
+  models.UserRole:
+    enum:
+    - USER
+    - ADMIN
+    - SECURITY
+    type: string
+    x-enum-varnames:
+    - RoleUser
+    - RoleAdmin
+    - RoleSecurity
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API for Campus Lost & Found System
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Campus Lost & Found API
+  version: "1.0"
+paths:
+  /assets:
+    post:
+      consumes:
+      - application/json
+      description: Create asset and generate QR code
+      parameters:
+      - description: Create Asset Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAssetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AssetResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new asset
+      tags:
+      - assets
+  /assets/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get asset by ID
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AssetResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get asset details
+      tags:
+      - assets
+  /assets/{id}/found-events:
+    get:
+      consumes:
+      - application/json
+      description: Get history of found events
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.FoundEvent'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get found events for an asset
+      tags:
+      - assets
+  /assets/{id}/lost-mode:
+    put:
+      consumes:
+      - application/json
+      description: Enable or disable lost mode
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Lost Mode Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateLostModeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update lost mode
+      tags:
+      - assets
+  /assets/{id}/report-found:
+    post:
+      consumes:
+      - application/json
+      description: Report that an asset has been found by scanning QR
+      parameters:
+      - description: Asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Report Found Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReportFoundRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Report asset found (Scan QR)
+      tags:
+      - assets
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email and password
+      parameters:
+      - description: Register Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /claims/{id}/decide:
+    put:
+      consumes:
+      - application/json
+      description: Decide on a claim (Finder only)
+      parameters:
+      - description: Claim ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Decide Claim Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.DecideClaimRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Approve or Reject a claim
+      tags:
+      - claims
+  /enumerations/campus-locations:
+    get:
+      consumes:
+      - application/json
+      description: Get list of campus locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CampusLocation'
+            type: array
+      summary: Get campus locations
+      tags:
+      - enumerations
+  /enumerations/item-categories:
+    get:
+      consumes:
+      - application/json
+      description: Get list of item categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ItemCategory'
+            type: array
+      summary: Get item categories
+      tags:
+      - enumerations
+  /items/{id}/claim:
+    post:
+      consumes:
+      - application/json
+      description: Claim a found item
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create Claim Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateClaimRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ClaimResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Submit a claim for an item
+      tags:
+      - items
+  /items/{id}/claims:
+    get:
+      consumes:
+      - application/json
+      description: Get all claims for an item (Finder only)
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Claim'
+            type: array
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get claims for an item
+      tags:
+      - items
+  /items/found:
+    post:
+      consumes:
+      - application/json
+      description: Report an item found without QR code
+      parameters:
+      - description: Create Found Item Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateFoundItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Report a found item (Finder First)
+      tags:
+      - items
+  /notifications:
+    get:
+      consumes:
+      - application/json
+      description: Get notifications for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Notification'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get user notifications
+      tags:
+      - notifications
+  /notifications/{id}/read:
+    put:
+      consumes:
+      - application/json
+      description: Mark a notification as read
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Mark notification as read
+      tags:
+      - notifications
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file to storage
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload a file
+      tags:
+      - upload
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

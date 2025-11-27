@@ -1,0 +1,168 @@
+package services
+
+import (
+	"campus-lost-and-found/internal/dto"
+	"campus-lost-and-found/internal/matching"
+	"campus-lost-and-found/internal/models"
+	"campus-lost-and-found/internal/repository"
+	"errors"
+
+	"github.com/google/uuid"
+)
+
+type ItemService struct {
+	ItemRepo       *repository.ItemRepository
+	AssetRepo      *repository.AssetRepository
+	ClaimRepo      *repository.ClaimRepository
+	MatchingEngine *matching.MatchingEngine
+	NotifService   *NotificationService
+}
+
+func NewItemService(itemRepo *repository.ItemRepository, assetRepo *repository.AssetRepository, claimRepo *repository.ClaimRepository, matchingEngine *matching.MatchingEngine, notifService *NotificationService) *ItemService {
+	return &ItemService{
+		ItemRepo:       itemRepo,
+		AssetRepo:      assetRepo,
+		ClaimRepo:      claimRepo,
+		MatchingEngine: matchingEngine,
+		NotifService:   notifService,
+	}
+}
+
+func (s *ItemService) ReportFoundItem(req dto.CreateFoundItemRequest, finderID uuid.UUID) (*dto.ItemResponse, error) {
+	item := &models.Item{
+		Title:                req.Title,
+		CategoryID:           req.CategoryID,
+		LocationID:           req.LocationID,
+		ImageURL:             req.ImageURL,
+		VerificationQuestion: req.VerificationQuestion,
+		VerificationAnswer:   req.VerificationAnswer,
+		FinderID:             finderID,
+		Status:               models.ItemStatusOpen,
+	}
+
+	if err := s.ItemRepo.Create(item); err != nil {
+		return nil, err
+	}
+
+	// Run Matching Engine
+	go func() {
+		lostAssets, err := s.AssetRepo.FindLostAssets()
+		if err == nil {
+			s.MatchingEngine.RunMatching(item, lostAssets)
+		}
+	}()
+
+	return &dto.ItemResponse{
+		ID:                   item.ID,
+		Title:                item.Title,
+		CategoryID:           item.CategoryID,
+		LocationID:           item.LocationID,
+		ImageURL:             item.ImageURL,
+		VerificationQuestion: item.VerificationQuestion,
+		Status:               string(item.Status),
+		CreatedAt:            item.CreatedAt,
+	}, nil
+}
+
+func (s *ItemService) GetItem(id string) (*models.Item, error) {
+	return s.ItemRepo.FindByID(id)
+}
+
+func (s *ItemService) SubmitClaim(itemID string, req dto.CreateClaimRequest, ownerID uuid.UUID) (*dto.ClaimResponse, error) {
+	item, err := s.ItemRepo.FindByID(itemID)
+	if err != nil {
+		return nil, err
+	}
+
+	if item.Status != models.ItemStatusOpen {
+		return nil, errors.New("item is not open for claims")
+	}
+
+	claim := &models.Claim{
+		ItemID:      item.ID,
+		OwnerID:     ownerID,
+		AnswerInput: req.AnswerInput,
+		Status:      models.ClaimStatusPending,
+	}
+
+	if err := s.ClaimRepo.Create(claim); err != nil {
+		return nil, err
+	}
+
+	// Notify Finder
+	s.NotifService.CreateNotification(
+		item.FinderID,
+		"New Claim Received",
+		"Someone has claimed an item you found.",
+		"CLAIM_NEW",
+		claim.ID,
+	)
+
+	return &dto.ClaimResponse{
+		ID:          claim.ID,
+		ItemID:      claim.ItemID,
+		OwnerID:     claim.OwnerID,
+		AnswerInput: claim.AnswerInput,
+		Status:      string(claim.Status),
+		CreatedAt:   claim.CreatedAt,
+	}, nil
+}
+
+func (s *ItemService) GetClaims(itemID string, userID uuid.UUID) ([]models.Claim, error) {
+	item, err := s.ItemRepo.FindByID(itemID)
+	if err != nil {
+		return nil, err
+	}
+
+	if item.FinderID != userID {
+		return nil, errors.New("unauthorized")
+	}
+
+	return s.ClaimRepo.FindByItemID(itemID)
+}
+
+func (s *ItemService) DecideClaim(claimID string, status string, userID uuid.UUID) error {
+	claim, err := s.ClaimRepo.FindByID(claimID)
+	if err != nil {
+		return err
+	}
+
+	// Verify Finder
+	item, err := s.ItemRepo.FindByID(claim.ItemID.String())
+	if err != nil {
+		return err
+	}
+
+	if item.FinderID != userID {
+		return errors.New("unauthorized")
+	}
+
+	claim.Status = models.ClaimStatus(status)
+	if err := s.ClaimRepo.Update(claim); err != nil {
+		return err
+	}
+
+	if status == "APPROVED" {
+		item.Status = models.ItemStatusClaimed
+		s.ItemRepo.Update(item)
+
+		// Notify Owner
+		s.NotifService.CreateNotification(
+			claim.OwnerID,
+			"Claim Approved!",
+			"Your claim has been approved. You can now contact the finder.",
+			"CLAIM_APPROVED",
+			claim.ID,
+		)
+	} else {
+		s.NotifService.CreateNotification(
+			claim.OwnerID,
+			"Claim Rejected",
+			"Your claim has been rejected.",
+			"CLAIM_REJECTED",
+			claim.ID,
+		)
+	}
+
+	return nil
+}
