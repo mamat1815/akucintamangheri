@@ -164,3 +164,21 @@ func (ctrl *AssetController) GetFoundEvents(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, events)
 }
+
+// GetLostAssets godoc
+// @Summary Get all lost assets
+// @Description Get a list of assets reported as lost
+// @Tags assets
+// @Accept json
+// @Produce json
+// @Success 200 {object} []dto.AssetResponse
+// @Failure 500 {object} map[string]string
+// @Router /assets/lost [get]
+func (ctrl *AssetController) GetLostAssets(c *gin.Context) {
+	assets, err := ctrl.Service.GetLostAssets()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, assets)
+}

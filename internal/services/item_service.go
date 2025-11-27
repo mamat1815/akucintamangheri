@@ -6,6 +6,7 @@ import (
 	"campus-lost-and-found/internal/models"
 	"campus-lost-and-found/internal/repository"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -31,12 +32,13 @@ func NewItemService(itemRepo *repository.ItemRepository, assetRepo *repository.A
 func (s *ItemService) ReportFoundItem(req dto.CreateFoundItemRequest, finderID uuid.UUID) (*dto.ItemResponse, error) {
 	item := &models.Item{
 		Title:                req.Title,
+		Type:                 models.ItemTypeFound,
 		CategoryID:           req.CategoryID,
-		LocationID:           req.LocationID,
+		LocationID:           &req.LocationID,
 		ImageURL:             req.ImageURL,
 		VerificationQuestion: req.VerificationQuestion,
 		VerificationAnswer:   req.VerificationAnswer,
-		FinderID:             finderID,
+		FinderID:             &finderID,
 		Status:               models.ItemStatusOpen,
 	}
 
@@ -56,7 +58,7 @@ func (s *ItemService) ReportFoundItem(req dto.CreateFoundItemRequest, finderID u
 		ID:                   item.ID,
 		Title:                item.Title,
 		CategoryID:           item.CategoryID,
-		LocationID:           item.LocationID,
+		LocationID:           *item.LocationID,
 		ImageURL:             item.ImageURL,
 		VerificationQuestion: item.VerificationQuestion,
 		Status:               string(item.Status),

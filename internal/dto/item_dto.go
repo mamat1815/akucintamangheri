@@ -15,6 +15,15 @@ type CreateFoundItemRequest struct {
 	VerificationAnswer   string    `json:"verification_answer" binding:"required"`
 }
 
+type CreateLostItemRequest struct {
+	Title            string    `json:"title" binding:"required"`
+	CategoryID       uuid.UUID `json:"category_id" binding:"required"`
+	Description      string    `json:"description"`
+	LocationLastSeen string    `json:"location_last_seen" binding:"required"`
+	DateLost         string    `json:"date_lost" binding:"required"` // Format YYYY-MM-DD
+	ImageURL         string    `json:"image_url"`
+}
+
 type ItemResponse struct {
 	ID                   uuid.UUID `json:"id"`
 	Title                string    `json:"title"`

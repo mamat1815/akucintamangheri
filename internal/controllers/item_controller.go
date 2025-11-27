@@ -45,6 +45,34 @@ func (ctrl *ItemController) ReportFoundItem(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// ReportLostItem godoc
+// @Summary Report a lost item (Ad-Hoc)
+// @Description Report a lost item without QR code
+// @Tags items
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body dto.CreateLostItemRequest true "Create Lost Item Request"
+// @Success 200 {object} dto.ItemResponse
+// @Failure 400 {object} map[string]string
+// @Router /items/lost [post]
+func (ctrl *ItemController) ReportLostItem(c *gin.Context) {
+	var req dto.CreateLostItemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := middleware.GetUserID(c)
+	res, err := ctrl.Service.ReportLostItem(req, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
 // SubmitClaim godoc
 // @Summary Submit a claim for an item
 // @Description Claim a found item

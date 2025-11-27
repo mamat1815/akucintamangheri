@@ -77,19 +77,31 @@ const (
 	ItemStatusResolved ItemStatus = "RESOLVED"
 )
 
-// Finder-First Item
+type ItemType string
+
+const (
+	ItemTypeLost  ItemType = "LOST"
+	ItemTypeFound ItemType = "FOUND"
+)
+
+// Finder-First Item (and now Owner-First Lost Item)
 type Item struct {
 	Base
 	Title                string         `json:"title"`
+	Type                 ItemType       `gorm:"default:'FOUND'" json:"type"`
 	CategoryID           uuid.UUID      `json:"category_id"`
 	Category             ItemCategory   `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
-	LocationID           uuid.UUID      `json:"location_id"`
-	Location             CampusLocation `gorm:"foreignKey:LocationID" json:"location,omitempty"`
+	LocationID           *uuid.UUID     `json:"location_id"` // Nullable for Lost items
+	Location             *CampusLocation `gorm:"foreignKey:LocationID" json:"location,omitempty"`
+	LocationDescription  string         `json:"location_description"` // For Lost items (free text)
 	ImageURL             string         `json:"image_url"`
 	VerificationQuestion string         `json:"verification_question"`
 	VerificationAnswer   string         `json:"-"` // Plaintext per request, but hidden from JSON
-	FinderID             uuid.UUID      `json:"finder_id"`
-	Finder               User           `gorm:"foreignKey:FinderID" json:"finder,omitempty"`
+	FinderID             *uuid.UUID     `json:"finder_id"` // Nullable for Lost items
+	Finder               *User          `gorm:"foreignKey:FinderID" json:"finder,omitempty"`
+	OwnerID              *uuid.UUID     `json:"owner_id"` // Nullable for Found items
+	Owner                *User          `gorm:"foreignKey:OwnerID" json:"owner,omitempty"`
+	DateLost             *time.Time     `json:"date_lost"`
 	Status               ItemStatus     `gorm:"default:'OPEN'" json:"status"`
 }
 

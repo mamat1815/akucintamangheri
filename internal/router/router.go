@@ -99,6 +99,7 @@ func (r *AppRouter) Setup(engine *gin.Engine) {
 		// Assets
 		assets := protected.Group("/assets")
 		{
+			assets.GET("/lost", r.AssetController.GetLostAssets) // Public/Protected? Prompt implies public feed, but here under protected. Let's keep it protected for now as per structure.
 			assets.POST("", r.AssetController.CreateAsset)
 			assets.GET("/:id", r.AssetController.GetAsset) // Authenticated Get
 			assets.PUT("/:id/lost-mode", r.AssetController.UpdateLostMode)
@@ -125,6 +126,7 @@ func (r *AppRouter) Setup(engine *gin.Engine) {
 		// Items (Finder First)
 		items := protected.Group("/items")
 		{
+			items.POST("/lost", r.ItemController.ReportLostItem) // Ad-Hoc Lost Item
 			items.POST("/found", r.ItemController.ReportFoundItem)
 			items.POST("/:id/claim", r.ItemController.SubmitClaim)
 			items.GET("/:id/claims", r.ItemController.GetClaims)

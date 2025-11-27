@@ -116,3 +116,26 @@ func (s *AssetService) ReportFound(assetID string, req dto.ReportFoundRequest) e
 func (s *AssetService) GetFoundEvents(assetID string) ([]models.FoundEvent, error) {
 	return s.Repo.GetFoundEvents(assetID)
 }
+
+func (s *AssetService) GetLostAssets() ([]dto.AssetResponse, error) {
+	assets, err := s.Repo.FindLostAssets()
+	if err != nil {
+		return nil, err
+	}
+
+	var responses []dto.AssetResponse
+	for _, asset := range assets {
+		responses = append(responses, dto.AssetResponse{
+			ID:           asset.ID,
+			OwnerID:      asset.OwnerID,
+			CategoryID:   asset.CategoryID,
+			CategoryName: asset.Category.Name, // Preloaded in Repo
+			Description:  asset.Description,
+			LostMode:     asset.LostMode,
+			QRCodeURL:    asset.QRCodeURL,
+			CreatedAt:    asset.CreatedAt,
+			// PrivateImageURL is intentionally omitted for public feed
+		})
+	}
+	return responses, nil
+}
