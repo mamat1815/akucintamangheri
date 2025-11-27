@@ -10,6 +10,21 @@ WORKDIR /app
 COPY go.mod go.sum ./
 
 # Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
+RUN go mod download
+
+# Copy the source from the current directory to the Working Directory inside the container
+COPY . .
+
+# Build the Go app
+# Set GOGC to lower value to trigger GC more frequently and reduce memory usage
+ENV GOGC=20
+RUN CGO_ENABLED=0 GOOS=linux go build -v -x -p 1 -o campus-lost-found ./cmd/server/main.go
+
+# Run Stage
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
 WORKDIR /root/
 
 # Copy the Pre-built binary from the previous stage
@@ -19,7 +34,6 @@ COPY --from=builder /app/campus-lost-found .
 # Ideally, we should NOT copy .env and rely on environment variables passed at runtime.
 
 # Expose port 3000 to the outside world
-# Expose port 3000 to the outside world
 EXPOSE 3000
 
 # Create storage directory
@@ -27,5 +41,4 @@ RUN mkdir -p /root/storage
 
 # Command to run the executable
 # Ensure PORT env var is set to 3000
-
 CMD ["./campus-lost-found"]
