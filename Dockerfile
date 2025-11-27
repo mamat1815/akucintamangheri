@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o campus-lost-found ./cmd/server/main.go
 
 # Run Stage
 FROM alpine:latest
@@ -26,7 +26,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 # Copy the Pre-built binary from the previous stage
-COPY --from=builder /app/main .
+COPY --from=builder /app/campus-lost-found .
 COPY --from=builder /app/.env . 
 # Note: In production, it's better to inject env vars via Docker/Jenkins, but copying .env for simplicity if it exists.
 # Ideally, we should NOT copy .env and rely on environment variables passed at runtime.
@@ -41,4 +41,4 @@ RUN mkdir -p /root/storage
 # Command to run the executable
 # Ensure PORT env var is set to 3000
 
-CMD ["./main"]
+CMD ["./campus-lost-found"]

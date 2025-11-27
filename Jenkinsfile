@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         // Define environment variables here or in Jenkins credentials
-        DOCKER_IMAGE_NAME = 'campus-backend'
-        CONTAINER_NAME = 'campus-backend-container'
+        DOCKER_IMAGE_NAME = 'campus-lost-found'
+        CONTAINER_NAME = 'campus-lost-found-container'
         PORT = '3000'
         // Default values (override in Jenkins Credentials/Config)
         JWT_EXPIRY = '24h'
@@ -42,8 +42,8 @@ pipeline {
                         docker run -d \
                         --name ${CONTAINER_NAME} \
                         -p ${PORT}:3000 \
-                        -v /var/www/campus-backend/storage:/root/storage \
-                        --env-file /var/www/campus-backend/.env \
+                        -v /var/www/campus-lost-found/storage:/root/storage \
+                        --env-file /var/www/campus-lost-found/.env \
                         --restart unless-stopped \
                         ${DOCKER_IMAGE_NAME}
                     """
