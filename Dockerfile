@@ -16,7 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/server/main.go
 
 # Run Stage
 FROM alpine:latest
@@ -40,11 +40,5 @@ RUN mkdir -p /root/storage
 
 # Command to run the executable
 # Ensure PORT env var is set to 3000
-ENV PORT=3000
-ENV GIN_MODE=release
-ENV UPLOAD_PATH=/root/storage
-ENV MAX_UPLOAD_SIZE=10485760
-ENV JWT_EXPIRY=24h
-ENV ALLOWED_ORIGINS=*
 
 CMD ["./main"]
