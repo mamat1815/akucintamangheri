@@ -1,5 +1,25 @@
 basePath: /api/v1
 definitions:
+  controllers.CreateCategoryRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  controllers.CreateLocationRequest:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+      name:
+        type: string
+    required:
+    - latitude
+    - longitude
+    - name
+    type: object
   dto.AssetResponse:
     properties:
       category_id:
@@ -689,6 +709,35 @@ paths:
       summary: Get campus locations
       tags:
       - enumerations
+    post:
+      consumes:
+      - application/json
+      description: Create a new campus location
+      parameters:
+      - description: Create Location Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CampusLocation'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create campus location
+      tags:
+      - enumerations
   /enumerations/item-categories:
     get:
       consumes:
@@ -704,6 +753,35 @@ paths:
               $ref: '#/definitions/models.ItemCategory'
             type: array
       summary: Get item categories
+      tags:
+      - enumerations
+    post:
+      consumes:
+      - application/json
+      description: Create a new item category
+      parameters:
+      - description: Create Category Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ItemCategory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create item category
       tags:
       - enumerations
   /items/{id}/claim:
