@@ -6,6 +6,10 @@ pipeline {
         DOCKER_IMAGE_NAME = 'campus-backend'
         CONTAINER_NAME = 'campus-backend-container'
         PORT = '3000'
+        // Default values (override in Jenkins Credentials/Config)
+        JWT_EXPIRY = '24h'
+        ALLOWED_ORIGINS = '*'
+        MAX_UPLOAD_SIZE = '10485760'
     }
 
     stages {
@@ -46,6 +50,8 @@ pipeline {
                         docker run -d \
                         --name ${CONTAINER_NAME} \
                         -p ${PORT}:3000 \
+                        -v /var/www/campus-backend/storage:/root/storage \
+                        --env-file /var/www/campus-backend/.env \
                         --restart unless-stopped \
                         ${DOCKER_IMAGE_NAME}
                     """

@@ -32,11 +32,19 @@ COPY --from=builder /app/.env .
 # Ideally, we should NOT copy .env and rely on environment variables passed at runtime.
 
 # Expose port 3000 to the outside world
+# Expose port 3000 to the outside world
 EXPOSE 3000
+
+# Create storage directory
+RUN mkdir -p /root/storage
 
 # Command to run the executable
 # Ensure PORT env var is set to 3000
 ENV PORT=3000
 ENV GIN_MODE=release
+ENV UPLOAD_PATH=/root/storage
+ENV MAX_UPLOAD_SIZE=10485760
+ENV JWT_EXPIRY=24h
+ENV ALLOWED_ORIGINS=*
 
 CMD ["./main"]
