@@ -34,20 +34,38 @@ pipeline {
                 script {
                     echo 'Deploying to VPS...'
                     
-                    // Force remove existing container to prevent duplicates/conflicts
-                    sh "docker rm -f ${CONTAINER_NAME} || true"
+                    // 1. Backup: Rename existing container to -backup
+                    // Remove old backup if exists
+                    sh "docker rm -f ${CONTAINER_NAME}-backup || true"
+                    // Rename current running container to backup (if exists)
+                    sh "docker rename ${CONTAINER_NAME} ${CONTAINER_NAME}-backup || true"
+                    // Stop the backup container to free up the port
+                    sh "docker stop ${CONTAINER_NAME}-backup || true"
 
-                    // Run the new container
-                    sh """
-                        docker run -d \
-                        --name ${CONTAINER_NAME} \
-                        -p ${PORT}:3000 \
-                        -v /var/www/campus-lost-found/storage:/root/storage \
-                        --env-file /var/www/campus-lost-found/.env \
-                        --sysctl net.ipv6.conf.all.disable_ipv6=1 \
-                        --restart unless-stopped \
-                        ${DOCKER_IMAGE_NAME}
-                    """
+                    // 2. Deploy: Run the new container
+                    try {
+                        sh """
+                            docker run -d \
+                            --name ${CONTAINER_NAME} \
+                            -p ${PORT}:3000 \
+                            -v /var/www/campus-lost-found/storage:/root/storage \
+                            --env-file /var/www/campus-lost-found/.env \
+                            --sysctl net.ipv6.conf.all.disable_ipv6=1 \
+                            --restart unless-stopped \
+                            ${DOCKER_IMAGE_NAME}
+                        """
+                        
+                        // 3. Health Check: Wait 10s and check if container is still running
+                        echo 'Performing Health Check...'
+                        sleep 10
+                        // Check if container is running. If not, this command fails (exit code 1)
+                        sh "docker ps -f name=${CONTAINER_NAME} | grep ${CONTAINER_NAME}"
+                        
+                    } catch (Exception e) {
+                        echo "Deployment failed or Health Check failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        error("Deployment failed")
+                    }
                 }
             }
         }
@@ -55,16 +73,24 @@ pipeline {
 
     post {
         always {
-            // Clean up dangling images to save space and prevent duplicates
+            // Clean up dangling images
             sh "docker image prune -f || true"
         }
         success {
-            echo 'Deployment successful!'
+            echo 'Deployment successful! Removing backup container...'
+            sh "docker rm -f ${CONTAINER_NAME}-backup || true"
         }
         failure {
-            echo 'Deployment failed.'
-            // Optional: Try to remove the container if it failed to start properly
+            echo 'Deployment failed. Rolling back to previous version...'
+            
+            // 1. Remove the failed new container
             sh "docker rm -f ${CONTAINER_NAME} || true"
+            
+            // 2. Restore the backup container
+            sh "docker rename ${CONTAINER_NAME}-backup ${CONTAINER_NAME} || true"
+            sh "docker start ${CONTAINER_NAME} || true"
+            
+            echo 'Rollback completed.'
         }
     }
 }
