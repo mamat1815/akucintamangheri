@@ -250,3 +250,92 @@ func (ctrl *ItemController) DeleteItem(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Item deleted successfully"})
 }
+
+// UpdateItem godoc
+// @Summary Update an item
+// @Description Update item details (Finder or Owner only)
+// @Tags items
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Item ID"
+// @Param request body dto.UpdateItemRequest true "Update Item Request"
+// @Success 200 {object} dto.ItemResponse
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /items/{id} [put]
+func (ctrl *ItemController) UpdateItem(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.UpdateItemRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := middleware.GetUserID(c)
+	res, err := ctrl.Service.UpdateItem(id, req, userID)
+	if err != nil {
+		if err.Error() == "unauthorized" {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+// UpdateItemStatus godoc
+// @Summary Update item status
+// @Description Mark item as RESOLVED or CLAIMED (Finder or Owner only)
+// @Tags items
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Item ID"
+// @Param request body dto.UpdateItemStatusRequest true "Update Item Status Request"
+// @Success 200 {object} dto.ItemResponse
+// @Failure 403 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /items/{id}/status [put]
+func (ctrl *ItemController) UpdateItemStatus(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.UpdateItemStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := middleware.GetUserID(c)
+	res, err := ctrl.Service.UpdateItemStatus(id, req.Status, userID)
+	if err != nil {
+		if err.Error() == "unauthorized" {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+// GetUserItems godoc
+// @Summary Get my items
+// @Description Get items reported by the authenticated user
+// @Tags items
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} []dto.ItemResponse
+// @Router /items/my [get]
+func (ctrl *ItemController) GetUserItems(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	items, err := ctrl.Service.GetUserItems(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, items)
+}
