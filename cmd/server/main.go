@@ -29,7 +29,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host 157.10.161.213:3000
+// @host api.afsar.my.id
 // @BasePath /api/v1
 // @securityDefinitions.apikey BearerAuth
 // @in header
