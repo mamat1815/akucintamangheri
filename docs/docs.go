@@ -865,7 +865,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Item"
+                            "$ref": "#/definitions/dto.ItemResponse"
                         }
                     },
                     "404": {
@@ -1649,7 +1649,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "finder": {
-                    "$ref": "#/definitions/dto.UserResponse"
+                    "$ref": "#/definitions/dto.ItemUserResponse"
                 },
                 "id": {
                     "type": "string"
@@ -1668,7 +1668,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "owner": {
-                    "$ref": "#/definitions/dto.UserResponse"
+                    "$ref": "#/definitions/dto.ItemUserResponse"
                 },
                 "show_phone": {
                     "description": "For both item types",
@@ -1688,12 +1688,30 @@ const docTemplate = `{
                     "description": "For lost items",
                     "type": "string"
                 },
+                "user_claim_status": {
+                    "description": "Status of claim by current user",
+                    "type": "string"
+                },
                 "verifications": {
                     "description": "For found items",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.VerificationResponse"
                     }
+                }
+            }
+        },
+        "dto.ItemUserResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
                 }
             }
         },

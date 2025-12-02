@@ -234,7 +234,7 @@ definitions:
       description:
         type: string
       finder:
-        $ref: '#/definitions/dto.UserResponse'
+        $ref: '#/definitions/dto.ItemUserResponse'
       id:
         type: string
       image_url:
@@ -247,7 +247,7 @@ definitions:
         description: For lost items
         type: boolean
       owner:
-        $ref: '#/definitions/dto.UserResponse'
+        $ref: '#/definitions/dto.ItemUserResponse'
       show_phone:
         description: For both item types
         type: boolean
@@ -261,11 +261,23 @@ definitions:
       urgency:
         description: For lost items
         type: string
+      user_claim_status:
+        description: Status of claim by current user
+        type: string
       verifications:
         description: For found items
         items:
           $ref: '#/definitions/dto.VerificationResponse'
         type: array
+    type: object
+  dto.ItemUserResponse:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
     type: object
   dto.LoginRequest:
     properties:
@@ -1228,7 +1240,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Item'
+            $ref: '#/definitions/dto.ItemResponse'
         "404":
           description: Not Found
           schema:
