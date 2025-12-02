@@ -45,3 +45,12 @@ func (r *ClaimRepository) FindPendingClaimByUserAndItem(userID, itemID string) (
 	}
 	return &claim, nil
 }
+
+func (r *ClaimRepository) FindByUserAndItem(userID, itemID string) (*models.Claim, error) {
+	var claim models.Claim
+	err := r.DB.Where("owner_id = ? AND item_id = ?", userID, itemID).Order("created_at desc").First(&claim).Error
+	if err != nil {
+		return nil, err
+	}
+	return &claim, nil
+}

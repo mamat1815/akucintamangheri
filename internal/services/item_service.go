@@ -197,8 +197,84 @@ func (s *ItemService) ReportLostItem(req dto.CreateLostItemRequest, ownerID uuid
 	}, nil
 }
 
-func (s *ItemService) GetItem(id string) (*models.Item, error) {
-	return s.ItemRepo.FindByID(id)
+func (s *ItemService) GetItem(id string, userID uuid.UUID) (*dto.ItemResponse, error) {
+	item, err := s.ItemRepo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Map to DTO
+	var verifResponses []dto.VerificationResponse
+	for _, v := range item.Verifications {
+		verifResponses = append(verifResponses, dto.VerificationResponse{
+			Question: v.Question,
+		})
+	}
+
+	var contactResponses []dto.ContactResponse
+	for _, c := range item.Contacts {
+		contactResponses = append(contactResponses, dto.ContactResponse{
+			Platform: string(c.Platform),
+			Value:    c.Value,
+		})
+	}
+
+	resp := &dto.ItemResponse{
+		ID:            item.ID,
+		Title:         item.Title,
+		Type:          string(item.Type),
+		Description:   item.Description,
+		CategoryID:    item.CategoryID,
+		ImageURL:      item.ImageURL,
+		Status:        string(item.Status),
+		CreatedAt:     item.CreatedAt,
+		Verifications: verifResponses,
+		Urgency:       string(item.Urgency),
+		OfferReward:   item.OfferReward,
+		ShowPhone:     item.ShowPhone,
+		Contacts:      contactResponses,
+	}
+
+	if item.LocationID != nil {
+		resp.LocationID = *item.LocationID
+	}
+	if item.Location != nil {
+		resp.LocationName = item.Location.Name
+	} else if item.LocationDescription != "" {
+		resp.LocationName = item.LocationDescription
+	}
+
+	if item.DateLost != nil {
+		resp.DateLost = item.DateLost.Format("2006-01-02")
+	}
+	if item.DateFound != nil {
+		resp.DateFound = item.DateFound.Format("2006-01-02")
+	}
+
+	if item.Finder != nil {
+		resp.Finder = &dto.ItemUserResponse{
+			ID:   item.Finder.ID,
+			Name: item.Finder.Name,
+			Role: string(item.Finder.Role),
+		}
+	}
+	if item.Owner != nil {
+		resp.Owner = &dto.ItemUserResponse{
+			ID:   item.Owner.ID,
+			Name: item.Owner.Name,
+			Role: string(item.Owner.Role),
+		}
+	}
+
+	// Check User Claim Status
+	if userID != uuid.Nil {
+		claim, err := s.ClaimRepo.FindByUserAndItem(userID.String(), item.ID.String())
+		if err == nil && claim != nil {
+			resp.UserClaimStatus = string(claim.Status)
+		}
+	}
+
+	return resp, nil
 }
 
 func (s *ItemService) GetAllItems(status string, itemType string) ([]dto.ItemResponse, error) {

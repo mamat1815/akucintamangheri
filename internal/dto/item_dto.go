@@ -69,6 +69,7 @@ type ItemResponse struct {
 	OfferReward   bool                   `json:"offer_reward,omitempty"` // For lost items
 	ShowPhone     bool                   `json:"show_phone"`             // For both item types
 	Contacts      []ContactResponse      `json:"contacts,omitempty"`     // For both item types
+	UserClaimStatus string               `json:"user_claim_status,omitempty"` // Status of claim by current user
 }
 
 type VerificationResponse struct {

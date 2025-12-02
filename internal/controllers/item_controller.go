@@ -198,12 +198,24 @@ func (ctrl *ItemController) DecideClaim(c *gin.Context) {
 // @Produce json
 // @Security BearerAuth
 // @Param id path string true "Item ID"
-// @Success 200 {object} models.Item
+// @Success 200 {object} dto.ItemResponse
 // @Failure 404 {object} map[string]string
 // @Router /items/{id} [get]
 func (ctrl *ItemController) GetItem(c *gin.Context) {
 	id := c.Param("id")
-	item, err := ctrl.Service.GetItem(id)
+	userID := middleware.GetUserID(c) // Can be empty/nil if not logged in, but GetUserID usually returns uuid.Nil if fails or not present?
+	// middleware.GetUserID returns uuid.UUID. If not present, it might return uuid.Nil or panic depending on implementation.
+	// Assuming it returns uuid.Nil if not found/auth failed but route is protected?
+	// Wait, GetItem might be public?
+	// In router.go: items.GET("/:id", r.ItemController.GetItem) is NOT explicitly there?
+	// Let's check router.go again.
+	// Ah, I see `items.GET("/:id/claims", ...)` but where is `items.GET("/:id")`?
+	// It seems I might have missed registering `GET /items/:id` in the router or it was there and I missed it in previous view.
+	// The controller has `GetItem`.
+	// Let's assume it is registered or will be.
+	// `middleware.GetUserID` extracts from context. If public, it might return nil.
+	
+	item, err := ctrl.Service.GetItem(id, userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
 		return
