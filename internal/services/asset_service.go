@@ -38,7 +38,7 @@ func (s *AssetService) CreateAsset(req dto.CreateAssetRequest, ownerID uuid.UUID
 	}
 
 	// Generate QR Code
-	qrContent := fmt.Sprintf("https://campus-lost-found.app/scan/%s", asset.ID.String())
+	qrContent := fmt.Sprintf("https://campuslf.afsar.my.id/scan/%s", asset.ID.String())
 	png, err := qrcode.Encode(qrContent, qrcode.Medium, 256)
 	if err != nil {
 		return nil, err
