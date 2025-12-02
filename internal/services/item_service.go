@@ -244,14 +244,14 @@ func (s *ItemService) GetAllItems(status string, itemType string) ([]dto.ItemRes
 
 		// Map Users
 		if item.Finder != nil {
-			resp.Finder = &dto.UserResponse{
+			resp.Finder = &dto.ItemUserResponse{
 				ID:   item.Finder.ID,
 				Name: item.Finder.Name,
 				Role: string(item.Finder.Role),
 			}
 		}
 		if item.Owner != nil {
-			resp.Owner = &dto.UserResponse{
+			resp.Owner = &dto.ItemUserResponse{
 				ID:   item.Owner.ID,
 				Name: item.Owner.Name,
 				Role: string(item.Owner.Role),
@@ -290,7 +290,7 @@ func (s *ItemService) GetAllItems(status string, itemType string) ([]dto.ItemRes
 				CreatedAt:    asset.UpdatedAt, // Use UpdatedAt as the time it was marked lost
 				DateLost:     asset.UpdatedAt.Format("2006-01-02"),
 				LocationName: "Registered Asset",
-				Owner: &dto.UserResponse{
+				Owner: &dto.ItemUserResponse{
 					ID:   asset.Owner.ID,
 					Name: asset.Owner.Name,
 					Role: string(asset.Owner.Role),
