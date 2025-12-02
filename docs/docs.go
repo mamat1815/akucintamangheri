@@ -1397,6 +1397,9 @@ const docTemplate = `{
                 "answer_input": {
                     "type": "string"
                 },
+                "claimer": {
+                    "$ref": "#/definitions/dto.ItemUserResponse"
+                },
                 "created_at": {
                     "type": "string"
                 },

@@ -20,7 +20,7 @@ func (r *ItemRepository) Create(item *models.Item) error {
 
 func (r *ItemRepository) FindByID(id string) (*models.Item, error) {
 	var item models.Item
-	err := r.DB.Preload("Category").Preload("Location").Preload("Finder").First(&item, "id = ?", id).Error
+	err := r.DB.Preload("Category").Preload("Location").Preload("Finder").Preload("Owner").First(&item, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -37,6 +37,14 @@ func (r *ItemRepository) FindAll(status string, itemType string) ([]models.Item,
 		query = query.Where("type = ?", itemType)
 	}
 	err := query.Order("created_at desc").Find(&items).Error
+	return items, err
+}
+
+func (r *ItemRepository) FindByUserID(userID string) ([]models.Item, error) {
+	var items []models.Item
+	err := r.DB.Preload("Category").Preload("Location").Preload("Finder").Preload("Owner").
+		Where("owner_id = ? OR finder_id = ?", userID, userID).
+		Order("created_at desc").Find(&items).Error
 	return items, err
 }
 

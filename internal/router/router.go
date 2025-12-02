@@ -132,7 +132,10 @@ func (r *AppRouter) Setup(engine *gin.Engine) {
 			items.POST("/lost", r.ItemController.ReportLostItem) // Ad-Hoc Lost Item
 			items.POST("/found", r.ItemController.ReportFoundItem)
 			items.GET("", r.ItemController.GetAllItems)
+			items.GET("/my", r.ItemController.GetUserItems) // Get My Items
 			items.GET("/:id", r.ItemController.GetItem)
+			items.PUT("/:id", r.ItemController.UpdateItem) // Edit Item
+			items.PUT("/:id/status", r.ItemController.UpdateItemStatus) // Update Status
 			items.DELETE("/:id", r.ItemController.DeleteItem)
 			items.POST("/:id/claim", r.ItemController.SubmitClaim)
 			items.GET("/:id/claims", r.ItemController.GetClaims)

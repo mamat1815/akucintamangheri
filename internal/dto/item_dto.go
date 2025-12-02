@@ -32,6 +32,23 @@ type CreateLostItemRequest struct {
 	Contacts         []ContactRequest `json:"contacts" binding:"dive"`
 }
 
+type UpdateItemRequest struct {
+	Title            string           `json:"title" example:"iPhone 13"`
+	Description      string           `json:"description" example:"Black case with a sticker"`
+	LocationLastSeen string           `json:"location_last_seen" example:"Canteen"`
+	DateLost         string           `json:"date_lost" example:"2023-10-26"` // Format YYYY-MM-DD
+	DateFound        string           `json:"date_found" example:"2023-10-27"` // Format YYYY-MM-DD
+	ImageURL         string           `json:"image_url" example:"http://example.com/iphone.jpg"`
+	Urgency          string           `json:"urgency" binding:"omitempty,oneof=NORMAL HIGH CRITICAL" example:"HIGH"`
+	OfferReward      bool             `json:"offer_reward" example:"true"`
+	ShowPhone        bool             `json:"show_phone" example:"false"`
+	Contacts         []ContactRequest `json:"contacts" binding:"dive"`
+}
+
+type UpdateItemStatusRequest struct {
+	Status string `json:"status" binding:"required,oneof=RESOLVED CLAIMED"`
+}
+
 type VerificationRequest struct {
 	Question string `json:"question" binding:"required" example:"What is the color?"`
 	Answer   string `json:"answer" binding:"required" example:"Blue"`
@@ -95,6 +112,7 @@ type ClaimResponse struct {
 	ImageURL    string    `json:"image_url"`
 	Status      string    `json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
+	Claimer     *ItemUserResponse `json:"claimer,omitempty"`
 }
 
 type DecideClaimRequest struct {
