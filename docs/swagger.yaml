@@ -886,6 +886,31 @@ paths:
       summary: Get all lost assets
       tags:
       - assets
+  /assets/my:
+    get:
+      consumes:
+      - application/json
+      description: Get all assets belonging to the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.AssetResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user's assets
+      tags:
+      - assets
   /auth/login:
     post:
       consumes:

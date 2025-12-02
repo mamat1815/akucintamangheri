@@ -139,3 +139,26 @@ func (s *AssetService) GetLostAssets() ([]dto.AssetResponse, error) {
 	}
 	return responses, nil
 }
+
+func (s *AssetService) GetUserAssets(userID uuid.UUID) ([]dto.AssetResponse, error) {
+	assets, err := s.Repo.FindByOwnerID(userID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	var responses []dto.AssetResponse
+	for _, asset := range assets {
+		responses = append(responses, dto.AssetResponse{
+			ID:              asset.ID,
+			OwnerID:         asset.OwnerID,
+			CategoryID:      asset.CategoryID,
+			CategoryName:    asset.Category.Name,
+			Description:     asset.Description,
+			PrivateImageURL: asset.PrivateImageURL, // Owner can see private image
+			LostMode:        asset.LostMode,
+			QRCodeURL:       asset.QRCodeURL,
+			CreatedAt:       asset.CreatedAt,
+		})
+	}
+	return responses, nil
+}

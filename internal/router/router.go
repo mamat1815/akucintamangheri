@@ -101,6 +101,7 @@ func (r *AppRouter) Setup(engine *gin.Engine) {
 		// Assets
 		assets := protected.Group("/assets")
 		{
+			assets.GET("/my", r.AssetController.GetUserAssets) // Get My Assets
 			assets.GET("/lost", r.AssetController.GetLostAssets) // Public/Protected? Prompt implies public feed, but here under protected. Let's keep it protected for now as per structure.
 			assets.POST("", r.AssetController.CreateAsset)
 			assets.GET("/:id", r.AssetController.GetAsset) // Authenticated Get

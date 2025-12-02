@@ -182,3 +182,23 @@ func (ctrl *AssetController) GetLostAssets(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, assets)
 }
+
+// GetUserAssets godoc
+// @Summary Get user's assets
+// @Description Get all assets belonging to the authenticated user
+// @Tags assets
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} []dto.AssetResponse
+// @Failure 500 {object} map[string]string
+// @Router /assets/my [get]
+func (ctrl *AssetController) GetUserAssets(c *gin.Context) {
+	userID := middleware.GetUserID(c)
+	assets, err := ctrl.Service.GetUserAssets(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, assets)
+}
