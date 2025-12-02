@@ -81,7 +81,7 @@ The project is configured for automated deployment via Jenkins using Docker.
 ## 📚 API Documentation
 
 ### Live Swagger Docs (VPS)
-👉 **http://157.10.161.213:3000/swagger/index.html**
+👉 **http://api.afsar.my.id/swagger/index.html**
 
 ### Local Swagger Docs
 👉 **http://localhost:3000/swagger/index.html**
