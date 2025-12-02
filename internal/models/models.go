@@ -135,6 +135,7 @@ const (
 type Item struct {
 	Base
 	Title               string             `json:"title"`
+	Description         string             `json:"description"`
 	Type                ItemType           `gorm:"default:'FOUND'" json:"type"`
 	CategoryID          uuid.UUID          `json:"category_id"`
 	Category            ItemCategory       `gorm:"foreignKey:CategoryID" json:"category,omitempty"`

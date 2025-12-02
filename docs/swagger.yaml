@@ -225,6 +225,16 @@ definitions:
         type: array
       created_at:
         type: string
+      date_found:
+        description: YYYY-MM-DD
+        type: string
+      date_lost:
+        description: YYYY-MM-DD
+        type: string
+      description:
+        type: string
+      finder:
+        $ref: '#/definitions/dto.UserResponse'
       id:
         type: string
       image_url:
@@ -236,12 +246,17 @@ definitions:
       offer_reward:
         description: For lost items
         type: boolean
+      owner:
+        $ref: '#/definitions/dto.UserResponse'
       show_phone:
         description: For both item types
         type: boolean
       status:
         type: string
       title:
+        type: string
+      type:
+        description: LOST/FOUND
         type: string
       urgency:
         description: For lost items
@@ -498,6 +513,8 @@ definitions:
       date_found:
         type: string
       date_lost:
+        type: string
+      description:
         type: string
       finder:
         $ref: '#/definitions/models.User'

@@ -156,6 +156,7 @@ func (s *ItemService) ReportLostItem(req dto.CreateLostItemRequest, ownerID uuid
 
 	item := &models.Item{
 		Title:               req.Title,
+		Description:         req.Description,
 		Type:                models.ItemTypeLost,
 		CategoryID:          req.CategoryID,
 		LocationDescription: req.LocationLastSeen,
@@ -221,11 +222,40 @@ func (s *ItemService) GetAllItems(status string, itemType string) ([]dto.ItemRes
 		resp := dto.ItemResponse{
 			ID:            item.ID,
 			Title:         item.Title,
+			Type:          string(item.Type),
+			Description:   item.Description,
 			CategoryID:    item.CategoryID,
 			ImageURL:      item.ImageURL,
 			Status:        string(item.Status),
 			CreatedAt:     item.CreatedAt,
 			Verifications: verifResponses,
+			Urgency:       string(item.Urgency),
+			OfferReward:   item.OfferReward,
+			ShowPhone:     item.ShowPhone,
+		}
+
+		// Map Dates
+		if item.DateLost != nil {
+			resp.DateLost = item.DateLost.Format("2006-01-02")
+		}
+		if item.DateFound != nil {
+			resp.DateFound = item.DateFound.Format("2006-01-02")
+		}
+
+		// Map Users
+		if item.Finder != nil {
+			resp.Finder = &dto.UserResponse{
+				ID:   item.Finder.ID,
+				Name: item.Finder.Name,
+				Role: string(item.Finder.Role),
+			}
+		}
+		if item.Owner != nil {
+			resp.Owner = &dto.UserResponse{
+				ID:   item.Owner.ID,
+				Name: item.Owner.Name,
+				Role: string(item.Owner.Role),
+			}
 		}
 
 		if item.LocationID != nil {
@@ -252,11 +282,19 @@ func (s *ItemService) GetAllItems(status string, itemType string) ([]dto.ItemRes
 			resp := dto.ItemResponse{
 				ID:           asset.ID,
 				Title:        asset.Description, // Use description as title for assets
+				Type:         "LOST",
+				Description:  asset.Description,
 				CategoryID:   asset.CategoryID,
 				ImageURL:     asset.PrivateImageURL, // Show private image for lost assets so people can identify
 				Status:       "LOST",
 				CreatedAt:    asset.UpdatedAt, // Use UpdatedAt as the time it was marked lost
+				DateLost:     asset.UpdatedAt.Format("2006-01-02"),
 				LocationName: "Registered Asset",
+				Owner: &dto.UserResponse{
+					ID:   asset.Owner.ID,
+					Name: asset.Owner.Name,
+					Role: string(asset.Owner.Role),
+				},
 			}
 			itemResponses = append(itemResponses, resp)
 		}

@@ -1637,6 +1637,20 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "date_found": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string"
+                },
+                "date_lost": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "finder": {
+                    "$ref": "#/definitions/dto.UserResponse"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1653,6 +1667,9 @@ const docTemplate = `{
                     "description": "For lost items",
                     "type": "boolean"
                 },
+                "owner": {
+                    "$ref": "#/definitions/dto.UserResponse"
+                },
                 "show_phone": {
                     "description": "For both item types",
                     "type": "boolean"
@@ -1661,6 +1678,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "LOST/FOUND",
                     "type": "string"
                 },
                 "urgency": {
@@ -2034,6 +2055,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "date_lost": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "finder": {

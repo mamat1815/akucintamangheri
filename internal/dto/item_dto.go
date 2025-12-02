@@ -42,9 +42,17 @@ type ContactRequest struct {
 	Value    string `json:"value" binding:"required" example:"08123456789"`
 }
 
+type UserResponse struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+	Role string    `json:"role"`
+}
+
 type ItemResponse struct {
 	ID            uuid.UUID              `json:"id"`
 	Title         string                 `json:"title"`
+	Type          string                 `json:"type"` // LOST/FOUND
+	Description   string                 `json:"description,omitempty"`
 	CategoryID    uuid.UUID              `json:"category_id"`
 	CategoryName  string                 `json:"category_name,omitempty"`
 	LocationID    uuid.UUID              `json:"location_id"`
@@ -53,6 +61,10 @@ type ItemResponse struct {
 	Verifications []VerificationResponse `json:"verifications,omitempty"` // For found items
 	Status        string                 `json:"status"`
 	CreatedAt     time.Time              `json:"created_at"`
+	DateLost      string                 `json:"date_lost,omitempty"`  // YYYY-MM-DD
+	DateFound     string                 `json:"date_found,omitempty"` // YYYY-MM-DD
+	Finder        *UserResponse          `json:"finder,omitempty"`
+	Owner         *UserResponse          `json:"owner,omitempty"`
 	Urgency       string                 `json:"urgency,omitempty"`      // For lost items
 	OfferReward   bool                   `json:"offer_reward,omitempty"` // For lost items
 	ShowPhone     bool                   `json:"show_phone"`             // For both item types

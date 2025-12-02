@@ -1631,6 +1631,20 @@
                 "created_at": {
                     "type": "string"
                 },
+                "date_found": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string"
+                },
+                "date_lost": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "finder": {
+                    "$ref": "#/definitions/dto.UserResponse"
+                },
                 "id": {
                     "type": "string"
                 },
@@ -1647,6 +1661,9 @@
                     "description": "For lost items",
                     "type": "boolean"
                 },
+                "owner": {
+                    "$ref": "#/definitions/dto.UserResponse"
+                },
                 "show_phone": {
                     "description": "For both item types",
                     "type": "boolean"
@@ -1655,6 +1672,10 @@
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "LOST/FOUND",
                     "type": "string"
                 },
                 "urgency": {
@@ -2028,6 +2049,9 @@
                     "type": "string"
                 },
                 "date_lost": {
+                    "type": "string"
+                },
+                "description": {
                     "type": "string"
                 },
                 "finder": {
